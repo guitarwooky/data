@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>콘텐츠 대시보드</title><script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" as="style" crossorigin="anonymous">
+<style>
+    html{scroll-behavior:smooth}
+    body{font-family:"Pretendard",sans-serif;background-color:#f8f9fa;color:#212529;font-weight:600;transition:background-color .3s,color .3s}
+    .dark body{background-color:#111827;color:#e5e7eb}
+    main{margin-left:18rem;color:#475569;transition:margin-left .3s ease-in-out}
+    .dark main{color:#d1d5db}
+    .nav-link{transition:all .2s ease;font-weight:600;color:#334155;border-radius:0.5rem}
+    .nav-link:hover{color:#3b82f6;background-color:#f1f5f9}
+    .nav-link.active{background-color:#3b82f6;color:white !important}
+    .dark .nav-link{color:#9ca3af}
+    .dark .nav-link:hover{color:#60a5fa;background-color:#1f293b}
+    .dark .nav-link.active{background-color:#3b82f6;color:white !important}
+    .content-section,.content-subsection{scroll-margin-top:2rem}
+    .card{background-color:#ffffff;border-radius:.75rem;box-shadow:0 4px 6px -1px rgba(0,0,0,.05),0 2px 4px -2px rgba(0,0,0,.05);border:1px solid #e2e8f0;transition:background-color .3s,border-color .3s}
+    .dark .card{background-color:#1f293b;border-color:#334155}
+    .card-header{padding:1.25rem 1.5rem;display:flex;align-items:center;font-weight:700;color:#1e293b;border-bottom:1px solid #e2e8f0;transition:color .3s,border-color .3s,background-color .3s}
+    .dark .card-header{background-color:#111827;color:#f3f4f6;border-bottom-color:#334155}
+    .card-content{padding:1.5rem;line-height:1.8;color:#475569;transition:color .3s}
+    .dark .card-content{color:#d1d5db}
+    .submenu{max-height:0;overflow:hidden;transition:max-height .3s ease-in-out}
+    .toggle-icon{transition:transform .3s ease}
+    #sidebar{background-color:#ffffff;border-r:1px solid #e2e8f0;transition:background-color .3s,border-color .3s,transform .3s ease-in-out}
+    .dark #sidebar{background-color:#1f293b;border-r-color:#334155}
+    #dashboard-title{color:#3b82f6}
+    .dark #dashboard-title{color:#60a5fa}
+    h1,h2,h3,h4{color:#1e293b}
+    .dark h1,.dark h2,.dark h3,.dark h4{color:#f9fafb}
+    .chart-wrapper{margin-top:1.5rem;padding-top:1.5rem;height:350px}
+    .content-paragraph{margin-bottom:1rem}
+    .content-list{padding-left:1.5rem;margin-bottom:1rem;list-style-position:outside}ul.content-list{list-style-type:disc}ol.content-list{list-style-type:decimal}
+    .content-list li{margin-bottom:.5rem;padding-left:.5rem}
+    .content-list li::marker{color:#3b82f6;font-weight:600}
+    .dark .content-list li::marker{color:#60a5fa}
+    .infographics-container{margin-top:2rem;padding-top:1.5rem;border-top:1px solid #e2e8f0;transition:border-color .3s}
+    .dark .infographics-container{border-top-color:#374151}
+    .infographics-header{font-size:1.125rem;font-weight:700;color:#1e293b;margin-bottom:1rem;transition:color .3s}
+    .dark .infographics-header{color:#f3f4f6}
+    .infographics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}
+    .infographic-insight-card{background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:.5rem;padding:1rem;display:flex;align-items:flex-start;gap:1rem;transition:background-color .3s,border-color .3s}
+    .dark .infographic-insight-card{background-color:#1f293b;border-color:#334155}
+    .infographic-insight-icon{font-size:1.75rem;line-height:1;margin-top:.125rem}
+    .infographic-insight-title{font-weight:700;color:#1e293b;margin-bottom:.25rem;transition:color .3s}
+    .dark .infographic-insight-title{color:#f3f4f6}
+    .infographic-insight-content .content-paragraph{font-size:.875rem;color:#475569;line-height:1.6;margin-bottom:0;transition:color .3s}
+    .dark .infographic-insight-content .content-paragraph{color:#d1d5db}
+    .intro-box{background-color:#eff6ff;border-left:4px solid #3b82f6}
+    .dark .intro-box{background-color:#1e293b;border-left-color:#60a5fa}
+    #menu-toggle{display:none;position:fixed;top:1rem;left:1rem;z-index:51;background-color:#3b82f6;color:white;border:none;padding:.5rem;border-radius:.5rem;cursor:pointer;box-shadow:0 4px 6px rgba(0,0,0,.1)}
+    .dark #menu-toggle{background-color:#60a5fa}
+    @media (max-width:768px){#menu-toggle{display:flex;align-items:center;justify-content:center;width:2.5rem;height:2.5rem}main{margin-left:0}#sidebar{transform:translateX(-100%);z-index:50}#sidebar.open{transform:translateX(0)}.content-section,.content-subsection{scroll-margin-top:4rem}}
+</style>
+
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.inset-y-0{top:0px;bottom:0px}.left-0{left:0px}.z-30{z-index:30}.mb-10{margin-bottom:2.5rem}.mb-12{margin-bottom:3rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.ml-4{margin-left:1rem}.mr-3{margin-right:0.75rem}.mt-1{margin-top:0.25rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.block{display:block}.flex{display:flex}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-screen{height:100vh}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-72{width:18rem}.flex-shrink-0{flex-shrink:0}.items-center{align-items:center}.justify-between{justify-content:space-between}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.overflow-y-auto{overflow-y:auto}.rounded-r-lg{border-top-right-radius:0.5rem;border-bottom-right-radius:0.5rem}.p-4{padding:1rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-4{padding-left:1rem;padding-right:1rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-7{padding-top:1.75rem;padding-bottom:1.75rem}.pl-4{padding-left:1rem}.text-2xl{font-size:1.5rem;line-height:2rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}@media (min-width: 640px){.sm\:p-6{padding:1.5rem}}@media (min-width: 1024px){.lg\:p-10{padding:2.5rem}}@media (prefers-color-scheme: dark){.dark\:text-blue-500{--tw-text-opacity:1;color:rgb(59 130 246 / var(--tw-text-opacity, 1))}}</style><style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.inset-y-0{top:0px;bottom:0px}.left-0{left:0px}.z-30{z-index:30}.mb-10{margin-bottom:2.5rem}.mb-12{margin-bottom:3rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.ml-4{margin-left:1rem}.mr-3{margin-right:0.75rem}.mt-1{margin-top:0.25rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.block{display:block}.flex{display:flex}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-screen{height:100vh}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-72{width:18rem}.flex-shrink-0{flex-shrink:0}.items-center{align-items:center}.justify-between{justify-content:space-between}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.overflow-y-auto{overflow-y:auto}.rounded-r-lg{border-top-right-radius:0.5rem;border-bottom-right-radius:0.5rem}.p-4{padding:1rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-4{padding-left:1rem;padding-right:1rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-7{padding-top:1.75rem;padding-bottom:1.75rem}.pl-4{padding-left:1rem}.text-2xl{font-size:1.5rem;line-height:2rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}@media (min-width: 640px){.sm\:p-6{padding:1.5rem}}@media (min-width: 1024px){.lg\:p-10{padding:2.5rem}}@media (prefers-color-scheme: dark){.dark\:text-blue-500{--tw-text-opacity:1;color:rgb(59 130 246 / var(--tw-text-opacity, 1))}}</style></head><body style="cursor: default; user-select: auto;"><button id="menu-toggle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path></svg></button><div id="sidebar" class="w-72 space-y-1 py-7 px-2 fixed inset-y-0 left-0 z-30 shadow-lg h-screen overflow-y-auto"><a href="#top" id="dashboard-title" class="block px-4 py-2.5 text-2xl font-bold">위험성평가 컨설팅 결과 보고서</a><nav id="main-nav" class="mt-4">
+        <ul class="space-y-1">
+            
+                    <li>
+                        <a href="#section-0" class="nav-link px-4 py-2 has-submenu flex justify-between items-center active">
+                            <span>위험성평가 개요</span>
+                            <span class="toggle-icon"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" style="transform: rotate(180deg);"><path fillrule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" cliprule="evenodd"></path></svg></span>
+                        </a>
+                        
+                    <ul class="submenu ml-4 mt-1 space-y-1" style="max-height: 76px;">
+                        
+                            <li>
+                                <a href="#subsection-0-0" class="nav-link block text-sm px-4 py-2">
+                                    <span>위험성평가의 정의</span>
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="#subsection-0-1" class="nav-link block text-sm px-4 py-2">
+                                    <span>법적 근거 및 절차</span>
+                                </a>
+                            </li>
+                        
+                    </ul>
+                
+                    </li>
+                
+                    <li>
+                        <a href="#section-1" class="nav-link px-4 py-2 has-submenu flex justify-between items-center">
+                            <span>사업장 현황 및 정보</span>
+                            <span class="toggle-icon"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillrule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" cliprule="evenodd"></path></svg></span>
+                        </a>
+                        
+                    <ul class="submenu ml-4 mt-1 space-y-1">
+                        
+                            <li>
+                                <a href="#subsection-1-0" class="nav-link block text-sm px-4 py-2">
+                                    <span>사업장 개요</span>
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="#subsection-1-1" class="nav-link block text-sm px-4 py-2">
+                                    <span>방문일 및 참여자 현황</span>
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="#subsection-1-2" class="nav-link block text-sm px-4 py-2">
+                                    <span>위험성평가 실시 현황</span>
+                                </a>
+                            </li>
+                        
+                    </ul>
+                
+                    </li>
+                
+                    <li>
+                        <a href="#section-2" class="nav-link px-4 py-2 has-submenu flex justify-between items-center">
+                            <span>주요 공정 및 위험요인</span>
+                            <span class="toggle-icon"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillrule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" cliprule="evenodd"></path></svg></span>
+                        </a>
+                        
+                    <ul class="submenu ml-4 mt-1 space-y-1">
+                        
+                            <li>
+                                <a href="#subsection-2-0" class="nav-link block text-sm px-4 py-2">
+                                    <span>주요 공정</span>
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="#subsection-2-1" class="nav-link block text-sm px-4 py-2">
+                                    <span>위험요인</span>
+                                </a>
+                            </li>
+                        
+                    </ul>
+                
+                    </li>
+                
+                    <li>
+                        <a href="#section-3" class="nav-link px-4 py-2 has-submenu flex justify-between items-center">
+                            <span>컨설팅 종합 평가 및 핵심 개선 권고</span>
+                            <span class="toggle-icon"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillrule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" cliprule="evenodd"></path></svg></span>
+                        </a>
+                        
+                    <ul class="submenu ml-4 mt-1 space-y-1">
+                        
+                            <li>
+                                <a href="#subsection-3-0" class="nav-link block text-sm px-4 py-2">
+                                    <span>사업장 주요 현황</span>
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="#subsection-3-1" class="nav-link block text-sm px-4 py-2">
+                                    <span>컨설팅 실시 주요 내용</span>
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="#subsection-3-2" class="nav-link block text-sm px-4 py-2">
+                                    <span>이것들을 이행해주세요!</span>
+                                </a>
+                            </li>
+                        
+                    </ul>
+                
+                    </li>
+                
+                    <li>
+                        <a href="#section-4" class="nav-link px-4 py-2 has-submenu flex justify-between items-center">
+                            <span>컨설팅 세부 개선 의견</span>
+                            <span class="toggle-icon"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillrule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" cliprule="evenodd"></path></svg></span>
+                        </a>
+                        
+                    <ul class="submenu ml-4 mt-1 space-y-1">
+                        
+                            <li>
+                                <a href="#subsection-4-0" class="nav-link block text-sm px-4 py-2">
+                                    <span>1. 위험성평가 시스템</span>
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="#subsection-4-1" class="nav-link block text-sm px-4 py-2">
+                                    <span>2. 사전 준비</span>
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="#subsection-4-2" class="nav-link block text-sm px-4 py-2">
+                                    <span>3. 위험요인 파악</span>
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="#subsection-4-3" class="nav-link block text-sm px-4 py-2">
+                                    <span>4. 위험성 결정</span>
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="#subsection-4-4" class="nav-link block text-sm px-4 py-2">
+                                    <span>5. 감소 대책 수립 및 실행</span>
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="#subsection-4-5" class="nav-link block text-sm px-4 py-2">
+                                    <span>6. 평가 결과 공유</span>
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="#subsection-4-6" class="nav-link block text-sm px-4 py-2">
+                                    <span>7. 기록 및 보존</span>
+                                </a>
+                            </li>
+                        
+                    </ul>
+                
+                    </li>
+                
+                    <li>
+                        <a href="#section-5" class="nav-link px-4 py-2 has-submenu flex justify-between items-center">
+                            <span>핵심 위험요인 및 개선 조치</span>
+                            <span class="toggle-icon"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillrule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" cliprule="evenodd"></path></svg></span>
+                        </a>
+                        
+                    <ul class="submenu ml-4 mt-1 space-y-1">
+                        
+                            <li>
+                                <a href="#subsection-5-0" class="nav-link block text-sm px-4 py-2">
+                                    <span>지게차 작업 시 위험</span>
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="#subsection-5-1" class="nav-link block text-sm px-4 py-2">
+                                    <span>제품 인양·운반 작업 시 위험</span>
+                                </a>
+                            </li>
+                        
+                    </ul>
+                
+                    </li>
+                
+        </ul>
+    </nav></div><main class="p-4 sm:p-6 lg:p-10">
+        <h1 id="top" class="text-4xl font-extrabold mb-4">위험성평가 컨설팅 결과 보고서</h1>
+        <p class="text-lg mb-10 intro-box pl-4 py-4 rounded-r-lg">본 자료는 ㈜남포물산의 위험성평가 컨설팅 결과 보고서입니다. 사업장의 위험요인 파악과 개선을 위한 현황 분석, 주요 공정 및 위험요인, 구체적인 개선 권고를 포함합니다.</p><div id="outer-wrapper-inserted-media-1763529993086" style="text-align: center;">
+        <div id="inserted-media-1763529993086" class="inserted-media-wrapper" style="width: 453.276px; display: inline-block; border: none; padding: 0px; text-align: initial;">
+            
+            <img src="https://i.postimg.cc/rsL84cmc/seukeulinsyas-2025-06-10-105002.png" alt="업로드된 이미지">
+            
+        </div>
+    </div>
+        
+                <section id="section-0" class="mb-12 content-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 flex-shrink-0 text-blue-600 dark:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <h2 class="text-2xl">위험성평가 개요</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-content"><p class="content-paragraph">위험성평가는 사업주가 사업장 내 위험요인을 파악하고, 이를 제거 또는 감소시키기 위한 대책을 수립하여 체계적이고 반복적으로 실행하는 과정입니다.<br>사업장은 위험성평가를 지속적으로 실시하고 관련 기록을 보존해야 합니다.</p></div>
+                            
+                <div id="subsection-0-0" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">위험성평가의 정의</h3>
+                    <div class="text-content"><p class="content-paragraph">사업주가 스스로 사업장 내 위험요인을 파악·평가하고 제거 또는 감소시키기 위한 대책을 수립·실행하는 것을 의미합니다. 이는 체계적이고 반복적으로 실시되어야 합니다.</p></div>
+                </div>
+            
+                <div id="subsection-0-1" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">법적 근거 및 절차</h3>
+                    <div class="text-content"><p class="content-paragraph">이는 산업안전보건법 제36조(위험성평가)에 따른 사업주의 의무입니다.<br>컨설팅 결과에 대해 이의가 있는 경우, 10일 이내에 당사 지역본부 또는 지사에 이의를 제기할 수 있습니다.</p></div>
+                </div>
+            
+                            
+                            
+                    <div class="infographics-container">
+                        <h3 class="infographics-header">주요 상세 정보</h3>
+                        <div class="infographics-grid">
+                            
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">💡</div>
+                        <div>
+                            <h4 class="infographic-insight-title">위험성평가는 의무사항입니다</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">이는 사업주가 위험요인을 파악하고 대책을 수립·실행하는 체계적인 활동입니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">✅</div>
+                        <div>
+                            <h4 class="infographic-insight-title">법적 의무 준수</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">이는 산업안전보건법 제36조에 따른 사업주의 중요한 의무입니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">⚠️</div>
+                        <div>
+                            <h4 class="infographic-insight-title">자율적 개선 권고</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">근로자와 고용주는 위험성평가와 같은 안전보건 활동을 통해 자율적인 개선을 공동으로 추진해야 합니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                        </div>
+                    </div>
+                
+                        </div>
+                    </div>
+                </section>
+            
+                <section id="section-1" class="mb-12 content-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 flex-shrink-0 text-blue-600 dark:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <h2 class="text-2xl">사업장 현황 및 정보</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-content"><p class="content-paragraph">㈜남포물산의 기본 정보, 컨설팅 일자, 참여자 현황을 요약합니다. 현재 위험성평가는 미실시 상태이며, 작업 전 안전점검(TBM) 활동 또한 미흡한 것으로 확인되었습니다.</p></div>
+                            
+                <div id="subsection-1-0" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">사업장 개요</h3>
+                    <div class="text-content"><p class="content-paragraph">사업장명은 ㈜남포물산이며, 전라남도 진도군 의신면 금갑리에 위치하고 있습니다.<br>총 근로자 수는 29명으로 확인되었습니다.</p></div>
+                </div>
+            
+                <div id="subsection-1-1" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">방문일 및 참여자 현황</h3>
+                    <div class="text-content"><p class="content-paragraph">컨설팅은 2025년 10월 30일에 2차로 진행되었으며, 사업장의 김철희 대표와 공단 정재원 담당자가 참여하였습니다.</p></div>
+                </div>
+            
+                <div id="subsection-1-2" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">위험성평가 실시 현황</h3>
+                    <div class="text-content"><p class="content-paragraph">사업장에서는 위험성평가가 미실시 상태이며, 작업 전 안전점검(TBM) 활동 또한 미흡한 것으로 확인되었습니다.</p></div>
+                </div>
+            
+                            <div class="chart-wrapper"><canvas id="chart-section-1"></canvas></div>
+                            
+                    <div class="infographics-container">
+                        <h3 class="infographics-header">주요 상세 정보</h3>
+                        <div class="infographics-grid">
+                            
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">🏢</div>
+                        <div>
+                            <h4 class="infographic-insight-title">사업장명</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">㈜남포물산은 전라남도 진도군에 위치한 수산물 가공식품 제조업체입니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">👥</div>
+                        <div>
+                            <h4 class="infographic-insight-title">근로자 수</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">총 근로자 수는 29명이며, 컨설팅 종합평가에는 외국인 근로자 3명을 포함한 20명으로 기재되어 있습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">📅</div>
+                        <div>
+                            <h4 class="infographic-insight-title">컨설팅 일자</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">현장 상황 확인을 위해 2025년 10월 30일에 2차 컨설팅이 실시되었습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                        </div>
+                    </div>
+                
+                        </div>
+                    </div>
+                </section>
+            
+                <section id="section-2" class="mb-12 content-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 flex-shrink-0 text-blue-600 dark:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <h2 class="text-2xl">주요 공정 및 위험요인</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-content"><p class="content-paragraph">사업장의 주요 공정은 원료 투입부터 출고까지 연결되어 있으며, 각 공정에서 지게차, 체인블록, 컨베이어, 절단기 등 다양한 설비와 관련된 잠재적 위험요인이 존재합니다.</p></div>
+                            
+                <div id="subsection-2-0" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">주요 공정</h3>
+                    <div class="text-content"><p class="content-paragraph">원료 투입 → 보관 → 투입/세척/탈수 → 절단/건조/출고 순으로 공정이 진행됩니다.<br>복잡한 작업에 대해서는 주요 작업을 중심으로 간결하게 요약하였습니다.</p></div>
+                </div>
+            
+                <div id="subsection-2-1" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">위험요인</h3>
+                    <div class="text-content"><p class="content-paragraph">원료 투입·보관 공정에서는 지게차에 의한 충돌 위험이 있습니다.<br>투입/세척/탈수 공정에서는 지게차, 체인블록, 컨베이어에 의한 충돌 및 끼임·말림 위험이 있습니다.<br>절단/건조/출고 공정에서는 절단기 및 지게차 사용에 의한 충돌 위험이 있습니다.</p></div>
+                </div>
+            
+                            <div class="chart-wrapper"><canvas id="chart-section-2"></canvas></div>
+                            
+                    <div class="infographics-container">
+                        <h3 class="infographics-header">주요 상세 정보</h3>
+                        <div class="infographics-grid">
+                            
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">⚙️</div>
+                        <div>
+                            <h4 class="infographic-insight-title">생산 공정</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">원료 투입부터 건조·출고까지 4단계로 구성되어 있습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">⚠️</div>
+                        <div>
+                            <h4 class="infographic-insight-title">주요 설비의 위험</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">지게차, 체인블록, 컨베이어, 절단기 등 설비 사용 시 위험이 높습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">🚫</div>
+                        <div>
+                            <h4 class="infographic-insight-title">핵심 잠재 위험</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">전 공정에서 '충돌' 사고 위험이 가장 높으며, '끼임·말림' 위험도 존재합니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                        </div>
+                    </div>
+                
+                        </div>
+                    </div>
+                </section>
+            
+                <section id="section-3" class="mb-12 content-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 flex-shrink-0 text-blue-600 dark:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <h2 class="text-2xl">컨설팅 종합 평가 및 핵심 개선 권고</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-content"><p class="content-paragraph">사업장은 수산물 가공식품(마른 김 등)을 제조하고 있으며, 정기적인 현장 점검과 지원 사업을 통해 개선 노력을 하고 있습니다.<br>그러나 위험성평가 미실시, TBM 활동 미흡, 안전보건 예산 관리 미비 등의 문제점이 확인되었습니다.<br>컨설팅을 통해 정기적인 위험성평가 실시 및 교육 자료 제공 등의 개선 방안이 지도되었습니다.</p></div>
+                            
+                <div id="subsection-3-0" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">사업장 주요 현황</h3>
+                    <div class="text-content"><p class="content-paragraph">수산물 가공식품 제조 사업장으로, 지게차, 컨베이어 등의 설비를 보유하고 있습니다.<br>정기적인 현장 점검과 담당자 주도 개선 조치를 이행하고 있으며, 공단 지원 사업을 통해 작업 환경 개선에 힘쓰고 있습니다.<br>2016년 유해위험방지계획서를 제출하였으나, 위험성평가는 미실시 상태이며, 작업 전 안전점검(TBM) 활동 또한 미흡합니다.<br>총 근로자 수는 20명(외국인 근로자 3명 포함)이며, 개인보호구 구입 및 안전보건 교육 등 관련 예산 수립 및 관리가 미흡합니다. 최근 1년간 산업재해는 발생하지 않았습니다.</p></div>
+                </div>
+            
+                <div id="subsection-3-1" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">컨설팅 실시 주요 내용</h3>
+                    <div class="text-content"><p class="content-paragraph">2차 컨설팅에서는 2016년 유해위험방지계획서에 있는 작업 공정별 위험성평가를 활용하여 정기적인 위험성평가 실시를 지도했습니다.<br>위험성평가표 양식과 안전보건교육 지도 자료를 제공하고, 사업주와 담당자가 효과적인 위험성평가를 위해 교육에 참여할 것을 권고했습니다.<br>1차 컨설팅 이후 사업장에서 작성된 추가 자료는 없었습니다.</p></div>
+                </div>
+            
+                <div id="subsection-3-2" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">이것들을 이행해주세요!</h3>
+                    <div class="text-content"><p class="content-paragraph">위험성평가 실시를 위해서는 실시 규정 작성, 위험한 기계·설비·기구, 위험물질 목록화, 사업장 내 정기적인 점검을 통한 위험요인 파악, 그리고 관리감독자와 근로자가 참여하는 구체적인 공정(작업)별 효과적인 위험성평가 실시가 필요합니다.<br>또한, 안전보건 정보 공개·공유 내용을 숙지해야 합니다. 개선 계획 수립 시에는 공학적 대책 &gt; 관리적 대책 &gt; 개인보호구 순으로 수립해야 합니다.</p></div>
+                </div>
+            
+                            <div class="chart-wrapper"><canvas id="chart-section-3"></canvas></div>
+                            
+                    <div class="infographics-container">
+                        <h3 class="infographics-header">주요 상세 정보</h3>
+                        <div class="infographics-grid">
+                            
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">❌</div>
+                        <div>
+                            <h4 class="infographic-insight-title">평가·점검 미흡</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">위험성평가 미실시 및 작업 전 안전점검(TBM) 활동 부족 현황.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">📚</div>
+                        <div>
+                            <h4 class="infographic-insight-title">지도 자료 제공</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">정기적인 위험성평가 실시를 위해 양식 및 안전보건 교육 지도 자료를 제공했습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">📣</div>
+                        <div>
+                            <h4 class="infographic-insight-title">핵심 권고 사항</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">실시 규정 작성, 위험요인 파악, 근로자가 참여하는 위험성평가 실시가 시급합니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                        </div>
+                    </div>
+                
+                        </div>
+                    </div>
+                </section>
+            
+                <section id="section-4" class="mb-12 content-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 flex-shrink-0 text-blue-600 dark:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <h2 class="text-2xl">컨설팅 세부 개선 의견</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-content"><p class="content-paragraph">위험성평가 시스템부터 기록·보존까지 7개 항목에서 확인된 문제점과 각각의 구체적인 개선 의견을 제시했습니다.<br>사업주는 안전보건 관리에 대한 확고한 의지를 명확히 하고, 근로자 참여를 장려하며, 최신 고시를 반영한 실시 규정을 수립해야 합니다.</p></div>
+                            
+                <div id="subsection-4-0" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">1. 위험성평가 시스템</h3>
+                    <div class="text-content"><p class="content-paragraph">현장 개선 사항에 대해 근로자 의견을 듣는 것은 있었으나, 위험성평가가 충분히 이루어지지 않아 관련 문제가 반영되지 않았습니다.<br>모든 근로자의 생명 보호와 직장 안전을 최우선 목표로 하는 확고한 의지와 신념을 반영한 안전보건 관리 방침을 수립하고, 사업주의 서명과 발효일을 명시해야 합니다.<br>위험성평가에 참여하는 구성원은 전문 교육을 이수하여 자신의 역할을 숙지하도록 지도하고, 근로자의 위험성평가 참여를 장려하고 관리해 주세요.</p></div>
+                </div>
+            
+                <div id="subsection-4-1" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">2. 사전 준비</h3>
+                    <div class="text-content"><p class="content-paragraph">위험성평가 실시 규정(고시 개정 사항 반영, 조직도 업데이트)을 보완해야 합니다.<br>사업장 위험성평가 지침(고용노동부 고시 제2024-76호, 2024년 12월 18일)을 참고하여 안전보건 방침, 조직, 평가 방법 및 절차, 근로자 참여 및 공유 방법, 기록 및 보존에 관한 실시 규정을 수립하고, 사업주 승인 후 관리해야 합니다.</p></div>
+                </div>
+            
+                <div id="subsection-4-2" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">3. 위험요인 파악</h3>
+                    <div class="text-content"><p class="content-paragraph">현장 점검이 주로 관리감독자에 의해 이루어지고 있어, 각 공정(작업)에서의 근로자 정기 점검을 통한 위험요인 파악 활동이 미흡했습니다.<br>사업장이 보유한 기계·설비 및 위험물질 목록을 참고하여 위험 장소 및 작업 종류별로 위험요인을 파악하고, 안전보건 정보(작업 표준, MSDS, 사고 사례 등)를 활용하여 위험성평가를 실시해 주세요.<br>위험요인은 사업장 내 정기 점검과 위험 작업에 종사하는 근로자 의견 청취를 통해 누락 없이 파악해야 합니다.</p></div>
+                </div>
+            
+                <div id="subsection-4-3" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">4. 위험성 결정</h3>
+                    <div class="text-content"><p class="content-paragraph">실시 규정에 따라 위험성을 평가하고, 허용 가능한 위험성인지 합리적으로 결정해야 합니다.<br>특히, 중대재해 발생 가능성이 있는 요인이나 동종 업종의 중대재해 관련 요인에 대해 위험성이 과소평가되지 않았는지 검토해야 합니다.<br>근로자는 위험요인의 위험성이 허용 가능한 수준인지 결정하는 과정에 참여해야 합니다.</p></div>
+                </div>
+            
+                <div id="subsection-4-4" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">5. 감소 대책 수립 및 실행</h3>
+                    <div class="text-content"><p class="content-paragraph">위험성 종류별로 개선 방안을 정리하고, 담당자 지정, 개선 예정일, 점검 주기 등 구체적인 실행 계획을 수립하며, 개선 완료 후에도 작업이 진행되도록 프로세스를 확립해야 합니다.<br>제거, 대체, 공학적 대책, 관리적 대책, 개인보호구 순으로 개선 대책을 수립하고, 가능한 경우 여러 방안을 검토해야 합니다.<br>개선 대책을 수립할 때는 현장 근로자의 의견을 수렴하고, 관리감독자의 참여를 얻어야 하며, 사업주의 검토를 받아야 합니다.</p></div>
+                </div>
+            
+                <div id="subsection-4-5" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">6. 평가 결과 공유</h3>
+                    <div class="text-content"><p class="content-paragraph">위험성평가 결과는 게시, 회람 등을 통해 전 구성원에게 주지시키고, 중대재해로 이어질 수 있는 위험요인은 작업 전 안전점검(TBM) 회의 등을 통해 정기적으로 주지시켜야 합니다.<br>위험성평가 및 실시 결과 관리에 관한 내용을 포함한 연간 안전보건 교육 계획을 수립해야 합니다.<br>사업주는 위험 작업에 종사하는 근로자에 대한 안전보건 교육 실시 현황을 최소 반기에 1회 이상 확인해야 합니다.</p></div>
+                </div>
+            
+                <div id="subsection-4-6" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">7. 기록 및 보존</h3>
+                    <div class="text-content"><p class="content-paragraph">위험성평가에 관한 자료는 3년간 기록·보존해야 합니다.<br>여기에는 실시 규정, 사전에 조사한 안전보건 정보, 위험요인, 위험성 결정 내용, 실시한 대책 내용, 그리고 사업장이 필요하다고 인정하는 사항이 포함됩니다.</p></div>
+                </div>
+            
+                            <div class="chart-wrapper"><canvas id="chart-section-4"></canvas></div>
+                            
+                    <div class="infographics-container">
+                        <h3 class="infographics-header">주요 상세 정보</h3>
+                        <div class="infographics-grid">
+                            
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">⚙️</div>
+                        <div>
+                            <h4 class="infographic-insight-title">안전보건 관리</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">사업주의 안전에 대한 확고한 의지와 서명은 관리 방침에 반드시 포함되어야 합니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">📚</div>
+                        <div>
+                            <h4 class="infographic-insight-title">전문 교육 권고</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">사업주와 담당자가 위험성평가 관련 전문 교육을 이수하여 역량을 강화해야 합니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">📝</div>
+                        <div>
+                            <h4 class="infographic-insight-title">실시 규정 보완</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">최신 고시를 반영하고 조직도를 업데이트한 실시 규정을 수립·관리해야 합니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                        </div>
+                    </div>
+                
+                        </div>
+                    </div>
+                </section>
+            
+                <section id="section-5" class="mb-12 content-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 flex-shrink-0 text-blue-600 dark:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <h2 class="text-2xl">핵심 위험요인 및 개선 조치</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-content"><p class="content-paragraph">지게차 작업 및 제품 인양·운반 작업은 현장에서 발생할 수 있는 치명적인 사고의 핵심 위험요인으로 파악되었습니다.<br>각 위험요인에 대한 구체적인 개선 조치가 제안되었고, 모두 개선 완료가 확인되었습니다.</p></div>
+                            
+                <div id="subsection-5-0" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">지게차 작업 시 위험</h3>
+                    <div class="text-content"><p class="content-paragraph">지게차 전도 및 근로자와의 충돌 위험이 있습니다.<br>개선 조치로는 유자격자에 의한 지게차 운전, 작업 계획 수립 및 근로자 교육, 운전자의 시야를 가리지 않는 적재, 작업 범위 내 타 근로자 접근 금지 및 통로 구분, 작업 지휘자 배치 등이 포함됩니다.<br>이 위험요인은 개선이 완료되었습니다.</p></div>
+                </div>
+            
+                <div id="subsection-5-1" class="mt-6 content-subsection">
+                    <h3 class="text-xl font-bold mb-3">제품 인양·운반 작업 시 위험</h3>
+                    <div class="text-content"><p class="content-paragraph">체인블록 등 제품 인양·운반 작업 중 근로자와 충돌할 위험이 있습니다.<br>개선 조치로는 인양물 하부 타 근로자 접근 금지, 자재 운반 경로 내 자재 방치 금지, 근로자 통로 지정 및 충돌 방지, 통로 조명 확보 등이 포함됩니다.<br>이 위험요인은 개선이 완료되었습니다.</p></div>
+                </div>
+            
+                            <div class="chart-wrapper"><canvas id="chart-section-5"></canvas></div>
+                            
+                    <div class="infographics-container">
+                        <h3 class="infographics-header">주요 상세 정보</h3>
+                        <div class="infographics-grid">
+                            
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">🚨</div>
+                        <div>
+                            <h4 class="infographic-insight-title">지게차 위험 관리</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">지게차 전도 및 근로자와의 충돌을 방지하기 위해서는 유자격자에 의한 운전, 작업 계획, 통로 구분이 필수입니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">💪</div>
+                        <div>
+                            <h4 class="infographic-insight-title">인양·운반 안전</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">체인블록 작업 시, 근로자와의 충돌을 막기 위해서는 접근 관리와 안전한 통로 확보가 중요합니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="infographic-insight-card">
+                        <div class="infographic-insight-icon">✅</div>
+                        <div>
+                            <h4 class="infographic-insight-title">개선 완료 확인</h4>
+                            <div class="infographic-insight-content">
+                                <p class="content-paragraph">제시된 2가지 핵심 위험요인에 대한 개선 조치는 모두 완료되었습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                        </div>
+                    </div>
+                
+                        </div>
+                    </div>
+                </section>
+            
+    </main>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const mainNav = document.getElementById('main-nav');
+        const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menu-toggle');
+        const mainContent = document.querySelector('main');
+
+        if (!mainNav || !sidebar || !menuToggle || !mainContent) return;
+
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('open');
+        });
+
+        const closeSidebar = () => {
+            if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        };
+        
+        mainContent.addEventListener('click', closeSidebar);
+
+        const openParentSubmenus = (element) => {
+            let parentSubmenu = element.closest('.submenu');
+            if (parentSubmenu) {
+                const header = parentSubmenu.previousElementSibling;
+                if (header && header.classList.contains('has-submenu')) {
+                    const icon = header.querySelector('.toggle-icon svg');
+                    if (!parentSubmenu.style.maxHeight || parentSubmenu.style.maxHeight === '0px') {
+                        parentSubmenu.style.maxHeight = parentSubmenu.scrollHeight + 'px';
+                        if (icon) icon.style.transform = 'rotate(180deg)';
+                    }
+                }
+            }
+        };
+
+        mainNav.addEventListener('click', (event) => {
+            const link = event.target.closest('a.nav-link');
+            if (!link) return;
+
+            closeSidebar();
+
+            if (link.hash) {
+                event.preventDefault();
+                document.querySelectorAll('#main-nav a.nav-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                const targetElement = document.querySelector(link.hash);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            if (link.classList.contains('has-submenu')) {
+                const submenu = link.nextElementSibling;
+                const icon = link.querySelector('.toggle-icon svg');
+                if (submenu && submenu.classList.contains('submenu')) {
+                    if (submenu.style.maxHeight && submenu.style.maxHeight !== '0px') {
+                        submenu.style.maxHeight = null;
+                        if (icon) icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        submenu.style.maxHeight = submenu.scrollHeight + 'px';
+                        if (icon) icon.style.transform = 'rotate(180deg)';
+                    }
+                }
+            }
+        });
+    
+        window.addEventListener('load', () => {
+            const sections = document.querySelectorAll('main .content-section, main .content-subsection');
+            const navLinks = document.querySelectorAll('#main-nav a.nav-link');
+
+            if (sections.length === 0 || navLinks.length === 0) return;
+
+            const firstSubmenu = document.querySelector("#main-nav .has-submenu");
+            if(firstSubmenu) {
+                const submenu = firstSubmenu.nextElementSibling;
+                const icon = firstSubmenu.querySelector('.toggle-icon svg');
+                if (submenu && submenu.classList.contains('submenu')) {
+                    submenu.style.maxHeight = submenu.scrollHeight + 'px';
+                    if (icon) icon.style.transform = 'rotate(180deg)';
+                }
+            }
+
+            const onScroll = () => {
+                let currentSectionId = '';
+                sections.forEach(section => {
+                    if (section.id && window.scrollY >= section.offsetTop - 150) {
+                        currentSectionId = section.getAttribute('id');
+                    }
+                });
+
+                const clickedActiveLink = document.querySelector('#main-nav a.nav-link.active');
+                navLinks.forEach(link => link.classList.remove('active'));
+                
+                let activeLink;
+                if (currentSectionId) {
+                    activeLink = document.querySelector('#main-nav a.nav-link[href="#' + currentSectionId + '"]');
+                }
+                
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                    openParentSubmenus(activeLink);
+                } else if (clickedActiveLink) {
+                    clickedActiveLink.classList.add('active');
+                }
+            };
+            window.addEventListener('scroll', onScroll);
+            onScroll();
+        });
+    });
+</script>
+
+<script id="chart-data-script">
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js is not loaded.');
+            return;
+        }
+        const chartsToRender = [{"id":"chart-section-1","data":{"type":"doughnut","title":"근로자 구성 현황 (총 20명 기준)","data":[{"label":"내국인 근로자","value":17,"color":"#3B82F6"},{"label":"외국인 근로자","value":3,"color":"#EF4444"}]}},{"id":"chart-section-2","data":{"type":"bar","title":"주요 공정별 잠재 위험 발생 빈도","data":[{"label":"충돌","value":4,"color":"#F59E0B"},{"label":"끼임·말림","value":1,"color":"#10B981"}]}},{"id":"chart-section-3","data":{"type":"bar","title":"컨설팅 종합 평가 안전보건 활동 주요 현황","data":[{"label":"위험성평가 미실시","value":1,"color":"#EC4899"},{"label":"TBM 활동 미흡","value":1,"color":"#8B5CF6"},{"label":"예산·교육 관리 미비","value":1,"color":"#06B6D4"},{"label":"산업재해 없음","value":1,"color":"#10B981"}]}},{"id":"chart-section-4","data":{"type":"bar","title":"컨설팅 항목별 개선 권고 건수","data":[{"label":"위험성평가 시스템","value":3,"color":"#3B82F6"},{"label":"사전 준비","value":2,"color":"#EF4444"},{"label":"위험요인 파악","value":2,"color":"#F59E0B"},{"label":"위험성 결정","value":2,"color":"#10B981"},{"label":"감소 대책 수립 및 실행","value":4,"color":"#6366F1"},{"label":"평가 결과 공유","value":2,"color":"#EC4899"},{"label":"기록 및 보존","value":1,"color":"#8B5CF6"}]}},{"id":"chart-section-5","data":{"type":"bar","title":"핵심 위험요인별 개선 조치 건수","data":[{"label":"지게차 작업","value":4,"color":"#F97316"},{"label":"제품 등 인양·운반","value":4,"color":"#A855F7"}]}}];
+        const chartInstances = {};
+        let currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+
+        window.addEventListener('themeUpdated', (e) => {
+            const newTheme = e.detail.theme;
+            if (newTheme !== currentTheme) {
+                currentTheme = newTheme;
+                chartsToRender.forEach(chartInfo => {
+                    if (chartInstances[chartInfo.id]) {
+                        renderChart(chartInfo);
+                    }
+                });
+            }
+        });
+
+        const renderChart = (chartInfo) => {
+            if (!chartInfo) return;
+            const ctx = document.getElementById(chartInfo.id)?.getContext('2d');
+            if (!ctx) return;
+            
+            if (chartInstances[chartInfo.id]) {
+                chartInstances[chartInfo.id].destroy();
+            }
+
+            const chartData = chartInfo.data;
+            const isHorizontalBar = chartData.type === 'bar' && chartData.data.length > 7;
+
+            const isDark = currentTheme === 'dark';
+            const textColor = isDark ? '#cbd5e1' : '#4b5563';
+            const gridColor = isDark ? '#334155' : '#e5e7eb';
+            const titleColor = isDark ? '#f1f5f9' : '#111827';
+            const tooltipBgColor = '#1e293b';
+            const tooltipTitleColor = '#f1f5f9';
+            const tooltipBodyColor = '#cbd5e1';
+
+            const allValues = chartData.data.map(d => d.value);
+            const maxValue = Math.max(...allValues);
+            let suggestedMaxValue;
+
+            if (maxValue > 0) {
+                if (maxValue <= 1) {
+                    suggestedMaxValue = 1;
+                } else if (maxValue <= 5) {
+                    suggestedMaxValue = Math.ceil(maxValue);
+                } else if (maxValue <= 10) {
+                    suggestedMaxValue = Math.ceil(maxValue / 2) * 2;
+                } else if (maxValue <= 20) {
+                    suggestedMaxValue = Math.ceil(maxValue / 5) * 5;
+                }
+                
+                if (suggestedMaxValue && suggestedMaxValue <= maxValue) {
+                    if (maxValue <= 5) suggestedMaxValue += 1;
+                    else if (maxValue <= 10) suggestedMaxValue += 2;
+                    else suggestedMaxValue += 5;
+                }
+            }
+            
+            const valueAxisKey = isHorizontalBar ? 'x' : 'y';
+            const categoryAxisKey = isHorizontalBar ? 'y' : 'x';
+            
+            const scalesOptions = {
+                [categoryAxisKey]: {
+                    display: chartData.type !== 'doughnut',
+                    grid: { display: false },
+                    ticks: { color: textColor, font: { weight: '600' } }
+                },
+                [valueAxisKey]: {
+                    display: chartData.type !== 'doughnut',
+                    beginAtZero: true,
+                    grid: { color: gridColor },
+                    ticks: { color: textColor },
+                }
+            };
+            
+            if (suggestedMaxValue !== undefined) {
+                scalesOptions[valueAxisKey].suggestedMax = suggestedMaxValue;
+            }
+
+            chartInstances[chartInfo.id] = new Chart(ctx, {
+                type: isHorizontalBar ? 'bar' : chartData.type,
+                data: {
+                    labels: chartData.data.map(d => d.label),
+                    datasets: [{
+                        label: chartData.title,
+                        data: allValues,
+                        backgroundColor: chartData.data.map((d, i) => (d.color || PALETTE[i % PALETTE.length]) + 'B3'), // 80% opacity
+                        borderColor: chartData.data.map((d, i) => d.color || PALETTE[i % PALETTE.length]),
+                        borderWidth: 2,
+                        borderRadius: chartData.type === 'bar' ? 6 : undefined,
+                        hoverBackgroundColor: chartData.data.map((d, i) => d.color || PALETTE[i % PALETTE.length]),
+                    }]
+                },
+                options: {
+                    indexAxis: isHorizontalBar ? 'y' : 'x',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: chartData.type === 'doughnut' || chartData.data.length <= 5,
+                            position: chartData.type === 'doughnut' ? 'right' : 'top',
+                            labels: {
+                                color: titleColor,
+                                padding: 20,
+                                font: { size: 14 }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: chartData.title,
+                            font: { size: 18, weight: 'bold' },
+                            padding: { top: 10, bottom: 20 },
+                            color: titleColor
+                        },
+                        tooltip: {
+                            backgroundColor: tooltipBgColor,
+                            titleColor: tooltipTitleColor,
+                            bodyColor: tooltipBodyColor,
+                            padding: 12,
+                            cornerRadius: 6,
+                            boxPadding: 4,
+                            titleFont: { weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    let value;
+                                    if (context.chart.config.type === 'doughnut' || context.chart.config.type === 'pie') {
+                                        value = context.parsed;
+                                    } else if (context.chart.options.indexAxis === 'y') {
+                                        value = context.parsed.x;
+                                    } else {
+                                        value = context.parsed.y;
+                                    }
+                                    if (typeof value === 'number' && !isNaN(value)) {
+                                        label += new Intl.NumberFormat('ko-KR').format(value);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: scalesOptions
+                }
+            });
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const chartId = entry.target.id;
+                    const chartInfo = chartsToRender.find(c => c.id === chartId);
+                    if (chartInfo) {
+                        renderChart(chartInfo);
+                        observer.unobserve(entry.target);
+                    }
+                }
+            });
+        }, { threshold: 0.1 });
+
+        chartsToRender.forEach(chartInfo => {
+            const el = document.getElementById(chartInfo.id);
+            if (el) {
+                observer.observe(el);
+            }
+        });
+    });
+</script>
+    </body></html>
